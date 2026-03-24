@@ -30,8 +30,12 @@ class _ConsonantsViewState extends State<ConsonantsView> {
     _play(consonants[index]);
   }
 
-  void _onCircleTap() {
-    HapticFeedback.mediumImpact(); // Slightly stronger 'thump' when hitting the big letter
+  Future<void> _onCircleTap() async {
+    // 1. Force the 'Thump' immediately
+    await HapticFeedback.vibrate(); // 'vibrate' is the most reliable for Web
+    
+    // 2. Add a tiny delay (optional) if the sound cuts off the vibration
+    // 3. Play the sound
     _play(consonants[_currentIndex]);
   }
 

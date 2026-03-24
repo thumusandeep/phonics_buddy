@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; 
+
 
 class AnimatedPhonicsCircle extends StatefulWidget {
   final String text;
@@ -8,8 +10,9 @@ class AnimatedPhonicsCircle extends StatefulWidget {
   const AnimatedPhonicsCircle({
     required this.text, 
     required this.color, 
-    required this.onTap
-  });
+    required this.onTap,
+    Key? key, 
+  }) : super(key: key);
 
   @override
   _AnimatedPhonicsCircleState createState() => _AnimatedPhonicsCircleState();
@@ -18,6 +21,7 @@ class AnimatedPhonicsCircle extends StatefulWidget {
 class _AnimatedPhonicsCircleState extends State<AnimatedPhonicsCircle> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  bool _isFlashing = false; // For the "Rainbow Pulse"
 
   @override
   void initState() {
@@ -37,8 +41,21 @@ class _AnimatedPhonicsCircleState extends State<AnimatedPhonicsCircle> with Sing
     super.dispose();
   }
 
-  void _handleTap() {
-    _controller.forward().then((_) => _controller.reverse()); // Grow then shrink
+  void _handleTap() async {
+    // 1. THE VIBRATION (Added here)
+    // We use .vibrate() because it's the most reliable for Web browsers
+    await HapticFeedback.vibrate(); 
+
+    // 2. THE VISUAL PULSE (Turn on the flash)
+    setState(() => _isFlashing = true);
+
+    // 3. THE ANIMATION (Pop the circle)
+    _controller.forward().then((_) {
+      _controller.reverse();
+      // Turn off the flash once the animation finishes
+      setState(() => _isFlashing = false); 
+    });
+
     widget.onTap(); // Play the sound
   }
 
@@ -48,27 +65,31 @@ class _AnimatedPhonicsCircleState extends State<AnimatedPhonicsCircle> with Sing
       scale: _scaleAnimation,
       child: GestureDetector(
         onTap: _handleTap,
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
           width: 160,
           height: 160,
           decoration: BoxDecoration(
-            color: widget.color.withOpacity(0.7),
+            // If flashing, make it bright white/yellow, otherwise use the normal color
+            color: _isFlashing ? Colors.white : widget.color.withOpacity(0.7),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: widget.color.withOpacity(0.3),
-                blurRadius: 15,
-                spreadRadius: 5,
+                // Make the glow bigger during the tap
+                color: _isFlashing ? Colors.white : widget.color.withOpacity(0.3),
+                blurRadius: _isFlashing ? 30 : 15,
+                spreadRadius: _isFlashing ? 10 : 5,
               )
             ],
           ),
           alignment: Alignment.center,
           child: Text(
             widget.text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 54, 
               fontWeight: FontWeight.bold, 
-              color: Colors.white
+              // Change text color during flash so it's still readable
+              color: _isFlashing ? widget.color : Colors.white 
             ),
           ),
         ),
