@@ -11,6 +11,7 @@ class AdBlendScreen extends StatefulWidget {
 }
 
 class _AdBlendScreenState extends State<AdBlendScreen> {
+  
   final AudioPlayer _player = AudioPlayer();
   final PageController _pageController = PageController();
 
@@ -41,6 +42,7 @@ class _AdBlendScreenState extends State<AdBlendScreen> {
       print("Error playing audio: $e");
     }
   }
+
   @override
   void initState() {
     super.initState();
@@ -58,41 +60,60 @@ class _AdBlendScreenState extends State<AdBlendScreen> {
       }
     });
   }
+
+  @override
+  void dispose() {
+    // Always remove the listener or dispose the controller to save memory
+    _pageController.dispose(); 
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
+      body: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: {
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse, // This is the magic for your laptop
+            PointerDeviceKind.trackpad,
+          },
+        ),
         // 'alignment: Alignment.center' centers the PageView automatically
-        alignment: Alignment.center, 
-        children: [
+        
+        child: Stack(
+          alignment: Alignment.center, 
           // 1. THE MAIN CONTENT (Keep this exactly as you have it)
-          PageView.builder(
-            controller: _pageController,
-            itemCount: adFamilyWords.length,
-            itemBuilder: (context, index) {
-              return _buildLessonPage(adFamilyWords[index]);
-            },
-          ),
-          
-          // 2. THE DOTS (Wrapped in Positioned to force them to the bottom)
-          Positioned(
-            bottom: 40, // This pushes the dots 40 pixels up from the bottom edge
-            child: SmoothPageIndicator(
+          children: [
+            PageView.builder(
+              physics: const BouncingScrollPhysics(),
               controller: _pageController,
-              count: adFamilyWords.length,
-              effect: ScrollingDotsEffect(
-                activeDotColor: Colors.orange,
-                dotColor: Colors.blue.withOpacity(0.2),
-                dotHeight: 12,
-                dotWidth: 12,
-                // This creates the "3-dot window" look you described
-                maxVisibleDots: 5, 
-                fixedCenter: true, 
+              itemCount: adFamilyWords.length,
+              itemBuilder: (context, index) {
+                return _buildLessonPage(adFamilyWords[index]);
+              },
+            ),
+          
+            // 2. THE DOTS (Wrapped in Positioned to force them to the bottom)
+            Positioned(
+              bottom: 40, // This pushes the dots 40 pixels up from the bottom edge
+              child: SmoothPageIndicator(
+                controller: _pageController,
+                count: adFamilyWords.length,
+                effect: ScrollingDotsEffect(
+                  activeDotColor: Colors.orange,
+                  dotColor: Colors.blue.withOpacity(0.2),
+                  dotHeight: 12,
+                  dotWidth: 12,
+                  // This creates the "3-dot window" look you described
+                  maxVisibleDots: 5, 
+                  fixedCenter: true, 
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

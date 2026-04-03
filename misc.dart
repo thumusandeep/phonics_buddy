@@ -1,98 +1,76 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // IMPORTANT: This is needed for HapticFeedback
-
-class AnimatedPhonicsCircle extends StatefulWidget {
-  final String text;
-  final Color color;
-  final VoidCallback onTap;
-
-  const AnimatedPhonicsCircle({
-    required this.text, 
-    required this.color, 
-    required this.onTap,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  _AnimatedPhonicsCircleState createState() => _AnimatedPhonicsCircleState();
-}
-
-class _AnimatedPhonicsCircleState extends State<AnimatedPhonicsCircle> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  bool _isFlashing = false; // For the "Rainbow Pulse"
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100), 
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _handleTap() async {
-    // 1. THE VIBRATION (Added here)
-    // We use .vibrate() because it's the most reliable for Web browsers
-    await HapticFeedback.vibrate(); 
-
-    // 2. THE VISUAL PULSE (Turn on the flash)
-    setState(() => _isFlashing = true);
-
-    // 3. THE ANIMATION (Pop the circle)
-    _controller.forward().then((_) {
-      _controller.reverse();
-      // Turn off the flash once the animation finishes
-      setState(() => _isFlashing = false); 
-    });
-
-    widget.onTap(); // Play the sound
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: GestureDetector(
-        onTap: _handleTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 160,
-          height: 160,
-          decoration: BoxDecoration(
-            // If flashing, make it bright white/yellow, otherwise use the normal color
-            color: _isFlashing ? Colors.white : widget.color.withOpacity(0.7),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                // Make the glow bigger during the tap
-                color: _isFlashing ? Colors.white : widget.color.withOpacity(0.3),
-                blurRadius: _isFlashing ? 30 : 15,
-                spreadRadius: _isFlashing ? 10 : 5,
-              )
-            ],
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            widget.text,
-            style: TextStyle(
-              fontSize: 54, 
-              fontWeight: FontWeight.bold, 
-              // Change text color during flash so it's still readable
-              color: _isFlashing ? widget.color : Colors.white 
+body: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: {
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.trackpad,
+          },
+        ),
+        // CHANGE THIS FROM Stack TO Column
+        child: Column( 
+          children: [
+            // 1. TOP SECTION: Selector Grid
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  int crossCount = constraints.maxWidth < 600 ? 6 : 11;
+                  return GridView.builder(
+                    shrinkWrap: true, // This keeps the grid from taking infinite height
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossCount,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                    ),
+                    itemCount: consonants.length,
+                    itemBuilder: (context, index) {
+                      // ... (Your existing GestureDetector code remains exactly the same)
+                    },
+                  );
+                },
+              ),
             ),
-          ),
+
+            // This SizedBox is fine here inside a Column
+            const SizedBox(height: 20),
+
+            // 2. MAIN SECTION: Now 'Expanded' is valid because its parent is a Column!
+            Expanded(
+              child: Stack( 
+                alignment: Alignment.bottomCenter,
+                children: [
+                  PageView.builder(
+                    controller: _pageController,
+                    physics: const BouncingScrollPhysics(), 
+                    onPageChanged: (index) {
+                      setState(() => _currentIndex = index);
+                      _play(consonants[index]);
+                    },
+                    itemCount: consonants.length,
+                    itemBuilder: (context, index) {
+                      return Center(
+                        child: AnimatedPhonicsCircle(
+                          text: consonants[index],
+                          color: Colors.orange,
+                          onTap: () => _play(consonants[index]),
+                        ),
+                      );
+                    },
+                  ),
+                  // THE DOTS
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 30),
+                    child: SmoothPageIndicator(
+                      controller: _pageController,
+                      // ... (Your existing SmoothPageIndicator code)
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+          ],
         ),
       ),
-    );
-  }
-}

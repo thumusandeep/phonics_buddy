@@ -3,6 +3,8 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../widgets/animated_phonics_circle.dart';
 import 'package:flutter/services.dart'; 
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'dart:ui';
+
 
 class ConsonantsView extends StatefulWidget {
   @override
@@ -48,98 +50,108 @@ class _ConsonantsViewState extends State<ConsonantsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // 1. TOP SECTION: Selector Grid
-          Padding(
-            padding: const EdgeInsets.all(15),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                int crossCount = constraints.maxWidth < 600 ? 6 : 11;
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossCount,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                  ),
-                  itemCount: consonants.length,
-                  itemBuilder: (context, index) {
-                    bool isSelected = _currentIndex == index;
-                    return GestureDetector(
-                      onTap: () => _onLetterSelected(index),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isSelected ? Colors.blue : Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.blue, width: 2),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          consonants[index],
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : Colors.blue,
+      body: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          dragDevices: {
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse, // This is what your Lenovo needs
+            PointerDeviceKind.trackpad,
+          },
+        ),
+        child: Column(
+          children: [
+            // 1. TOP SECTION: Selector Grid
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  int crossCount = constraints.maxWidth < 600 ? 6 : 11;
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossCount,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                    ),
+                    itemCount: consonants.length,
+                    itemBuilder: (context, index) {
+                      bool isSelected = _currentIndex == index;
+                      return GestureDetector(
+                        onTap: () => _onLetterSelected(index),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.blue : Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.blue, width: 2),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            consonants[index],
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected ? Colors.white : Colors.blue,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-          // 2. MAIN SECTION: The Focus Area
-          Expanded(
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() => _currentIndex = index);
-                    _play(consonants[index]);
-                  },
-                  itemCount: consonants.length,
-                  itemBuilder: (context, index) {
-                    return Center(
-                      child: AnimatedPhonicsCircle(
-                        text: consonants[index],
-                        color: Colors.orange,
-                        onTap: () => _play(consonants[index]),
-                      ),
-                    );
-                  },
-                ),
-                // THE DOTS: Positioned at the bottom of the stack
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 30),
-                  child: SmoothPageIndicator(
+            // 2. MAIN SECTION: The Focus Area
+            Expanded(
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  PageView.builder(
                     controller: _pageController,
-                    count: consonants.length,
-                    effect: ScrollingDotsEffect(
-                      activeDotColor: Colors.orange,
-                      dotColor: Colors.blue.withOpacity(0.2),
-                      dotHeight: 12,
-                      dotWidth: 12,
-                      // This is the "Capsule" setting:
-                      // It will show 3 main dots and shrink the ones at the edges
-                      maxVisibleDots: 5, 
-                      fixedCenter: true, // This keeps the active dot in the middle of the capsule
+                    physics: const BouncingScrollPhysics(), 
+                    onPageChanged: (index) {
+                      setState(() => _currentIndex = index);
+                      _play(consonants[index]);
+                    },
+                    itemCount: consonants.length,
+                    itemBuilder: (context, index) {
+                      return Center(
+                        child: AnimatedPhonicsCircle(
+                          text: consonants[index],
+                          color: Colors.orange,
+                          onTap: () => _play(consonants[index]),
+                        ),
+                      );
+                    },
+                  ),
+                  // THE DOTS: Positioned at the bottom of the stack
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 30),
+                    child: SmoothPageIndicator(
+                      controller: _pageController,
+                      count: consonants.length,
+                      effect: ScrollingDotsEffect(
+                        activeDotColor: Colors.orange,
+                        dotColor: Colors.blue.withOpacity(0.2),
+                        dotHeight: 12,
+                        dotWidth: 12,
+                        // This is the "Capsule" setting:
+                        // It will show 3 main dots and shrink the ones at the edges
+                        maxVisibleDots: 5, 
+                        fixedCenter: true, // This keeps the active dot in the middle of the capsule
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 20),
-        ],
+            
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }

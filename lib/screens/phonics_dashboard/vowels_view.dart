@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../widgets/animated_phonics_circle.dart';
+import 'dart:ui';
 
 enum VowelMode { short, long }
 
@@ -39,76 +40,85 @@ class _VowelsViewState extends State<VowelsView> {
   Widget build(BuildContext context) {
     Color themeColor = (_currentMode == VowelMode.short) ? Colors.green : Colors.orangeAccent;
 
-    return Column(
-      children: [
-        // 1. THE MODE SWITCHER
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          child: SegmentedButton<VowelMode>(
-            segments: const [
-              ButtonSegment(value: VowelMode.short, label: Text('Short Vowels'), icon: Icon(Icons.apple)),
-              ButtonSegment(value: VowelMode.long, label: Text('Long Vowels'), icon: Icon(Icons.cake)),
-            ],
-            selected: {_currentMode},
-            onSelectionChanged: (newSelection) {
-              setState(() {
-                _currentMode = newSelection.first;
-              });
-              _play(vowels[_currentIndex]); // Re-play the sound in the new mode
-            },
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(
+        dragDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse, // This is what your Lenovo needs
+          PointerDeviceKind.trackpad,
+        },
+      ),
+      child: Column(
+        children: [
+          // 1. THE MODE SWITCHER
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            child: SegmentedButton<VowelMode>(
+              segments: const [
+                ButtonSegment(value: VowelMode.short, label: Text('Short Vowels'), icon: Icon(Icons.apple)),
+                ButtonSegment(value: VowelMode.long, label: Text('Long Vowels'), icon: Icon(Icons.cake)),
+              ],
+              selected: {_currentMode},
+              onSelectionChanged: (newSelection) {
+                setState(() {
+                  _currentMode = newSelection.first;
+                });
+                _play(vowels[_currentIndex]); // Re-play the sound in the new mode
+              },
+            ),
           ),
-        ),
 
-        // 2. THE SELECTOR GRID (Top)
-        SizedBox(
-          height: 100,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(vowels.length, (index) {
-              bool isSelected = _currentIndex == index;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: ChoiceChip(
-                  label: Text(vowels[index], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  selected: isSelected,
-                  selectedColor: themeColor,
-                  onSelected: (selected) {
-                    if (selected) {
-                      _pageController.animateToPage(index, duration: const Duration(milliseconds: 300), curve: Curves.ease);
-                    }
+          // 2. THE SELECTOR GRID (Top)
+          SizedBox(
+            height: 100,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(vowels.length, (index) {
+                bool isSelected = _currentIndex == index;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ChoiceChip(
+                    label: Text(vowels[index], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    selected: isSelected,
+                    selectedColor: themeColor,
+                    onSelected: (selected) {
+                      if (selected) {
+                        _pageController.animateToPage(index, duration: const Duration(milliseconds: 300), curve: Curves.ease);
+                      }
+                    },
+                  ),
+                );
+              }),
+            ),
+          ),
+
+          // 3. THE FOCUS AREA (Bottom)
+          Expanded(
+            child: Stack(
+              children: [
+                PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() => _currentIndex = index);
+                    _play(vowels[index]);
+                  },
+                  itemCount: vowels.length,
+                  itemBuilder: (context, index) {
+                    return Center(
+                      child: AnimatedPhonicsCircle(
+                        text: vowels[index],
+                        color: themeColor,
+                        onTap: () => _play(vowels[index]),
+                      ),
+                    );
                   },
                 ),
-              );
-            }),
+                
+              ],
+            ),
           ),
-        ),
-
-        // 3. THE FOCUS AREA (Bottom)
-        Expanded(
-          child: Stack(
-            children: [
-              PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() => _currentIndex = index);
-                  _play(vowels[index]);
-                },
-                itemCount: vowels.length,
-                itemBuilder: (context, index) {
-                  return Center(
-                    child: AnimatedPhonicsCircle(
-                      text: vowels[index],
-                      color: themeColor,
-                      onTap: () => _play(vowels[index]),
-                    ),
-                  );
-                },
-              ),
-              
-            ],
-          ),
-        ),
-      ],
+        ],
+      )
     );
   }
 
