@@ -64,6 +64,7 @@ flutter:
     - assets/audio/consonants/
     - assets/audio/blends/
     - assets/audio/words/cvc/3_letters/ad_blend_words/
+    - assets/audio/words/cvc/3_letters/at_blend_words/
     - assets/audio/vowels/short/ 
     - assets/audio/vowels/long/
 

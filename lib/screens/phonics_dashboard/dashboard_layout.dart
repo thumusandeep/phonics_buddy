@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ad_blend.dart'; // The file we just created
+import 'ad_blend.dart';
+import 'at_blend.dart'; 
 import 'consonants_view.dart';
 import 'vowels_view.dart';
 import 'package:flutter/services.dart'; 
@@ -100,7 +101,7 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                 // ITEM: 'ad' blend
                 ListTile(
                   contentPadding: EdgeInsets.only(left: 50),
-                  title: Text("'ad' Blend family"),
+                  title: Text("'ad' Blend family - /æd/"),
                   onTap: () {
                     _updateScreen(AdBlendScreen());
                     if (Navigator.canPop(context)) Navigator.pop(context);
@@ -110,9 +111,11 @@ class _DashboardLayoutState extends State<DashboardLayout> {
                 // Placeholder for future blends
                 ListTile(
                   contentPadding: EdgeInsets.only(left: 50),
-                  title: Text("'at' Blend (Soon)"),
+                  title: Text("'at' Blend family - /æt/"),
                   onTap: () {
-                    // coming soon...
+                    _updateScreen(AtBlendScreen());
+                    if (Navigator.canPop(context)) Navigator.pop(context);
+                    Icon(Icons.arrow_right);
                   }, 
                 ),
               ],
