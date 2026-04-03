@@ -67,8 +67,8 @@ class _LessonViewState extends State<LessonView> {
               const SizedBox(height: 60),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                
                   _buildPhonicsCircle(widget.prefix, Colors.blue, 
                       () => _playSound('consonants', widget.prefix)),
                   const Padding(
@@ -128,6 +128,7 @@ class _LessonViewState extends State<LessonView> {
         curve: Curves.easeInOut, 
         width: 160,
         height: 160,
+        alignment: Alignment.center, 
         decoration: BoxDecoration(
           color: color.withOpacity(0.6),
           shape: BoxShape.circle,
@@ -135,11 +136,25 @@ class _LessonViewState extends State<LessonView> {
             BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5))
           ],
         ),
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 54, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
+        // child: Text(
+        //   text,
+        //   style: const TextStyle(fontSize: 54, fontWeight: FontWeight.bold, color: Colors.white),
+        // ),
+        child: text == widget.fullWord && _showStar 
+          ? Stack(
+              alignment: Alignment.center,
+              children: [
+                // The Star and Text logic goes here
+              ],
+            )
+          : Text(
+              text,
+              style: const TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
       ),
     );
   }

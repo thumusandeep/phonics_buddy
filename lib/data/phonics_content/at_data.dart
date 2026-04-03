@@ -9,13 +9,13 @@ class PhonicsWord {
 }
 
 final List<PhonicsWord> atFamilyWords = [
-  PhonicsWord(onset: 'B', rime: 'at', fullWord: 'Bat'),
-  PhonicsWord(onset: 'C', rime: 'at', fullWord: 'Cat'),
-  PhonicsWord(onset: 'F', rime: 'at', fullWord: 'Fat'),
-  PhonicsWord(onset: 'H', rime: 'at', fullWord: 'Hat'),
-  PhonicsWord(onset: 'M', rime: 'at', fullWord: 'Mat'),
-  PhonicsWord(onset: 'P', rime: 'at', fullWord: 'Pat'),
-  PhonicsWord(onset: 'R', rime: 'at', fullWord: 'Rat'),
-  PhonicsWord(onset: 'S', rime: 'at', fullWord: 'Sat'),
-  PhonicsWord(onset: 'V', rime: 'at', fullWord: 'Vat'),
+  PhonicsWord(onset: 'b', rime: 'at', fullWord: 'bat'),
+  PhonicsWord(onset: 'c', rime: 'at', fullWord: 'cat'),
+  PhonicsWord(onset: 'f', rime: 'at', fullWord: 'fat'),
+  PhonicsWord(onset: 'h', rime: 'at', fullWord: 'hat'),
+  PhonicsWord(onset: 'm', rime: 'at', fullWord: 'mat'),
+  PhonicsWord(onset: 'p', rime: 'at', fullWord: 'pat'),
+  PhonicsWord(onset: 'r', rime: 'at', fullWord: 'rat'),
+  PhonicsWord(onset: 's', rime: 'at', fullWord: 'sat'),
+  PhonicsWord(onset: 'v', rime: 'at', fullWord: 'vat'),
 ];

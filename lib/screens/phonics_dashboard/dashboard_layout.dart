@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'ad_blend.dart';
-import 'at_blend.dart'; 
-import 'consonants_view.dart';
-import 'vowels_view.dart';
+import 'all_lessons.dart';
 import 'package:flutter/services.dart'; 
+import '../../widgets/coming_soon_view.dart';
+import '../../widgets/vowel_folder.dart';
 
 class DashboardLayout extends StatefulWidget {
   @override
@@ -85,39 +84,90 @@ class _DashboardLayoutState extends State<DashboardLayout> {
         ),
         // const Divider(),
 
-        //FOLDER 3: Short Blends
+        //FOLDER 3: Blends
         ExpansionTile(
           leading: Icon(Icons.folder_open, color: Colors.orange),
-          title: Text("Short Blends", style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text("Word Families/Rimes", style: TextStyle(fontWeight: FontWeight.bold)),
           children: [
             // SUB-FOLDER: Short 'a'
-            ExpansionTile(
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: Icon(Icons.subtitles, size: 18),
-              ),
-              title: Text("Short 'a' - /æ/ "),
-              children: [
-                // ITEM: 'ad' blend
-                ListTile(
-                  contentPadding: EdgeInsets.only(left: 50),
-                  title: Text("'ad' Blend family - /æd/"),
-                  onTap: () {
-                    _updateScreen(AdBlendScreen());
-                    if (Navigator.canPop(context)) Navigator.pop(context);
-                    Icon(Icons.arrow_right);
-                  },
-                ),
-                // Placeholder for future blends
-                ListTile(
-                  contentPadding: EdgeInsets.only(left: 50),
-                  title: Text("'at' Blend family - /æt/"),
-                  onTap: () {
-                    _updateScreen(AtBlendScreen());
-                    if (Navigator.canPop(context)) Navigator.pop(context);
-                    Icon(Icons.arrow_right);
-                  }, 
-                ),
+            VowelFolder(
+              title: "Short 'a'",
+              phonetic: "/æ/",
+              onSelect: _updateScreen,
+              rimes: [
+                {'name': '-at', 'ipa': '/æt/', 'screen': AtBlendScreen()},
+                {'name': '-an', 'ipa': '/æn/', 'screen': AnBlendScreen()},
+                {'name': '-am', 'ipa': '/æm/', 'screen': AmBlendScreen()},
+                {'name': '-ap', 'ipa': '/æp/', 'screen': ApBlendScreen()},
+                {'name': '-ad', 'ipa': '/æd/', 'screen': AdBlendScreen()},
+                {'name': '-ag', 'ipa': '/æɡ/', 'screen': AgBlendScreen()},
+                {'name': '-ab', 'ipa': '/æb/', 'screen': AbBlendScreen()},
+                {'name': '-ack', 'ipa': '/æk/', 'screen': AckBlendScreen()},
+              ],
+            ),
+            // // SUB-FOLDER: Short 'e'
+            VowelFolder(
+              title: "Short 'e'",
+              phonetic: "/ɛ/",
+              onSelect: _updateScreen,
+              rimes: [
+                {'name': '-et', 'ipa': '/ɛt/', 'screen': EtBlendScreen()},
+                {'name': '-ed', 'ipa': '/ɛd/', 'screen': EdBlendScreen()},
+                {'name': '-en', 'ipa': '/ɛn/', 'screen': EnBlendScreen()},
+                {'name': '-eg', 'ipa': '/ɛɡ/', 'screen': EgBlendScreen()},
+                {'name': '-ell', 'ipa': '/ɛl/', 'screen': EllBlendScreen()},
+                {'name': '-est', 'ipa': '/ɛst/', 'screen': EstBlendScreen()},
+                {'name': '-end', 'ipa': '/ɛnd/', 'screen': EndBlendScreen()},
+                {'name': '-ent', 'ipa': '/ɛnt/', 'screen': EntBlendScreen()},
+              ],
+            ),
+            // // SUB-FOLDER: Short 'i'
+            VowelFolder(
+              title: "Short 'i'",
+              phonetic: "/ɪ/",
+              onSelect: _updateScreen,
+              rimes: [
+                {'name': '-it', 'ipa': '/ɪt/', 'screen': ItBlendScreen()},
+                {'name': '-in', 'ipa': '/ɪn/', 'screen': InBlendScreen()},
+                {'name': '-ip', 'ipa': '/ɪp/', 'screen': IpBlendScreen()},
+                {'name': '-ig', 'ipa': '/ɪɡ/', 'screen': IgBlendScreen()},
+                {'name': '-id', 'ipa': '/ɪd/', 'screen': IdBlendScreen()},
+                {'name': '-im', 'ipa': '/ɪm/', 'screen': ImBlendScreen()},
+                {'name': '-ill', 'ipa': '/ɪl/', 'screen': IllBlendScreen()},
+                {'name': '-ick', 'ipa': '/ɪk/', 'screen': IckBlendScreen()},
+
+              ],
+            ),
+            // // SUB-FOLDER: Short 'o'
+            VowelFolder(
+              title: "Short 'o'",
+              phonetic: "/ɒ/",
+              onSelect: _updateScreen,
+              rimes: [
+                {'name': '-ot', 'ipa': '/ɒt/', 'screen': OtBlendScreen()},
+                {'name': '-op', 'ipa': '/ɒp/', 'screen': OpBlendScreen()},
+                {'name': '-og', 'ipa': '/ɒɡ/', 'screen': OgBlendScreen()},
+                {'name': '-ob', 'ipa': '/ɒb/', 'screen': ObBlendScreen()},
+                {'name': '-od', 'ipa': '/ɒd/', 'screen': OdBlendScreen()},
+                {'name': '-ox', 'ipa': '/ɒks/', 'screen': OxBlendScreen()},
+                {'name': '-ock', 'ipa': '/ɒk/', 'screen': OckBlendScreen()},
+
+              ],
+            ),
+            // // SUB-FOLDER: Short 'u'
+            VowelFolder(
+              title: "Short 'u'",
+              phonetic: "/ʌ/",
+              onSelect: _updateScreen,
+              rimes: [
+                {'name': '-ut', 'ipa': '/ʌt/', 'screen': UtBlendScreen()},
+                {'name': '-un', 'ipa': '/ʌn/', 'screen': UnBlendScreen()},
+                {'name': '-ug', 'ipa': '/ʌɡ/', 'screen': UgBlendScreen()},
+                {'name': '-ub', 'ipa': '/ʌb/', 'screen': UbBlendScreen()},
+                {'name': '-ud', 'ipa': '/ʌd/', 'screen': UdBlendScreen()},
+                {'name': '-um', 'ipa': '/ʌm/', 'screen': UmBlendScreen()},
+                {'name': '-up', 'ipa': '/ʌp/', 'screen': UpBlendScreen()},
+                {'name': '-uck', 'ipa': '/ʌk/', 'screen': UckBlendScreen()},
               ],
             ),
           ],

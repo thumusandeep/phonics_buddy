@@ -9,11 +9,11 @@ class PhonicsWord {
 }
 
 final List<PhonicsWord> adFamilyWords = [
-  PhonicsWord(onset: 'B', rime: 'ad', fullWord: 'Bad'),
-  PhonicsWord(onset: 'D', rime: 'ad', fullWord: 'Dad'),
-  PhonicsWord(onset: 'H', rime: 'ad', fullWord: 'Had'),
-  PhonicsWord(onset: 'L', rime: 'ad', fullWord: 'Lad'),
-  PhonicsWord(onset: 'P', rime: 'ad', fullWord: 'Pad'),
-  PhonicsWord(onset: 'S', rime: 'ad', fullWord: 'Sad'),
-  PhonicsWord(onset: 'M', rime: 'ad', fullWord: 'Mad'),
+  PhonicsWord(onset: 'b', rime: 'ad', fullWord: 'bad'),
+  PhonicsWord(onset: 'd', rime: 'ad', fullWord: 'dad'),
+  PhonicsWord(onset: 'h', rime: 'ad', fullWord: 'had'),
+  PhonicsWord(onset: 'l', rime: 'ad', fullWord: 'lad'),
+  PhonicsWord(onset: 'm', rime: 'ad', fullWord: 'mad'),
+  PhonicsWord(onset: 'p', rime: 'ad', fullWord: 'pad'),
+  PhonicsWord(onset: 's', rime: 'ad', fullWord: 'sad'),
 ];
