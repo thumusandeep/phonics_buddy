@@ -36,6 +36,7 @@ class _AtBlendScreenState extends State<AtBlendScreen> {
     try {
       // On web, it's safer to release and re-set the source
       await _player.stop();
+      await Future.delayed(const Duration(milliseconds: 150)); 
       await _player.setVolume(volume);
       await _player.setSource(AssetSource(path));
       await _player.resume(); 

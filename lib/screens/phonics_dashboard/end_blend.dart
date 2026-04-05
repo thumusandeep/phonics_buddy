@@ -32,6 +32,7 @@ class _EndBlendScreenState extends State<EndBlendScreen> {
 
     try {
       await _player.stop();
+      await Future.delayed(const Duration(milliseconds: 150));
       await _player.setVolume(volume);
       await _player.setSource(AssetSource(path));
       await _player.resume(); 

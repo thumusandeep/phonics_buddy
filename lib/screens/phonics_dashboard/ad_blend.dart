@@ -36,8 +36,8 @@ class _AdBlendScreenState extends State<AdBlendScreen> {
     if (folder == 'word') path = "audio/words/cvc/3_letters/ad_blend_words/${fileName.toLowerCase()}.mp3";
 
     try {
-      // On web, it's safer to release and re-set the source
       await _player.stop();
+      await Future.delayed(const Duration(milliseconds: 150));
       await _player.setVolume(volume);
       await _player.setSource(AssetSource(path));
       await _player.resume(); 

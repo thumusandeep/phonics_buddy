@@ -4,7 +4,7 @@ import '../../widgets/animated_phonics_circle.dart';
 import 'package:flutter/services.dart'; 
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'dart:ui';
-
+import '../../utils/phonics_utils.dart';
 
 class ConsonantsView extends StatefulWidget {
   @override
@@ -43,6 +43,7 @@ class _ConsonantsViewState extends State<ConsonantsView> {
 
   void _play(String letter) async {
     await _player.stop();
+    await Future.delayed(const Duration(milliseconds: 150)); 
     await _player.play(AssetSource("audio/consonants/${letter.toLowerCase()}.mp3"));
   }
 
@@ -118,12 +119,34 @@ class _ConsonantsViewState extends State<ConsonantsView> {
                     },
                     itemCount: consonants.length,
                     itemBuilder: (context, index) {
-                      return Center(
-                        child: AnimatedPhonicsCircle(
-                          text: consonants[index],
-                          color: Colors.orange,
-                          onTap: () => _play(consonants[index]),
-                        ),
+                      String ipa = PhonicsUtils.getIPA(consonants[index], isLong: false);
+                      return Column(
+                        children: [
+                          AnimatedPhonicsCircle(
+                            text: consonants[index],
+                            color: Colors.orange,
+                            onTap: () => _play(consonants[index]),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(top: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            constraints: const BoxConstraints(maxWidth: 350),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.1), // Light version of the vowel color
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                            ),
+                            child: Text(
+                              ipa,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange.withOpacity(0.8), // Matches the vowel's color
+                                fontFamily: 'monospace', // Often looks better for IPA symbols
+                              ),
+                            ),
+                          ),
+                        ],     
                       );
                     },
                   ),
