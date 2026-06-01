@@ -12,7 +12,7 @@ class ConsonantsView extends StatefulWidget {
 }
 
 class _ConsonantsViewState extends State<ConsonantsView> {
-  final AudioPlayer _player = AudioPlayer();
+  // final AudioPlayer _player = AudioPlayer();
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
@@ -41,10 +41,11 @@ class _ConsonantsViewState extends State<ConsonantsView> {
     _play(consonants[_currentIndex]);
   }
 
-  void _play(String letter) async {
-    await _player.stop();
-    await Future.delayed(const Duration(milliseconds: 150)); 
-    await _player.play(AssetSource("audio/consonants/${letter.toLowerCase()}.mp3"));
+  void _play(String letter) {
+    String fileName = "${letter.toLowerCase()}.mp3";
+    
+    // Clean, single line:
+    PhonicsUtils.playAudio("audio/consonants/$fileName");
   }
 
   @override

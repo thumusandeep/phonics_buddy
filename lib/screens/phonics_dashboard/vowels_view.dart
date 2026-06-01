@@ -17,26 +17,14 @@ class _VowelsViewState extends State<VowelsView> {
   int _currentIndex = 0;
   final List<String> vowels = ['A', 'E', 'I', 'O', 'U'];
   final PageController _pageController = PageController();
-  final AudioPlayer _player = AudioPlayer();
+  // final AudioPlayer _player = AudioPlayer();
 
-  void _play(String letter) async {
-    // Dynamically choose the folder based on the mode
+  void _play(String letter) {
     String folder = (_currentMode == VowelMode.short) ? "short" : "long";
     String fileName = "${letter.toLowerCase()}.mp3";
-    String path = "audio/vowels/$folder/$fileName";
-
-    print("DEBUG: Trying to play path: $path");
     
-    try {
-      await _player.stop();
-      await Future.delayed(const Duration(milliseconds: 150)); 
-      // Use DeviceFileSource or generic Source if AssetSource fails on Chrome
-      await _player.play(AssetSource(path.replaceFirst('assets/', ''))); 
-      // If that still fails, try:
-      // await _player.setSource(AssetSource(path.replaceFirst('assets/', '')));
-    } catch (e) {
-      debugPrint("Audio Error: $e");
-    }
+    // Call the global manager in one line:
+    PhonicsUtils.playAudio("audio/vowels/$folder/$fileName");
   }
 
   @override

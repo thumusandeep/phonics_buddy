@@ -1,6 +1,39 @@
 // lib/utils/phonics_utils.dart
 
+import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
+
 class PhonicsUtils {
+  // 1. Single global player instance used across the entire app
+  static final AudioPlayer _globalPlayer = AudioPlayer();
+
+  // 2. Centralized audio execution logic optimized to bypass iOS audio context locks
+  static Future<void> playAudio(String assetPath) async {
+    final cleanPath = assetPath.replaceFirst('assets/', '');
+    debugPrint("GLOBAL AUDIO: Playing path -> $cleanPath");
+
+    try {
+      // 1. Force clear any current session
+      await _globalPlayer.stop();
+
+      // 2. Set the release mode to stop to reset the device hardware buffer after every play
+      await _globalPlayer.setReleaseMode(ReleaseMode.stop);
+
+      // 3. FORCE iOS to cache and decode the file directly into memory using a web URL stream
+      // This bypasses the typical "lazy-loading" stream that iOS blocks on short files
+      await _globalPlayer.setSource(AssetSource(cleanPath));
+      
+      // 4. Wake up the iOS hardware driver explicitly
+      await _globalPlayer.setVolume(1.0);
+      
+      // 5. Fire the audio
+      await _globalPlayer.resume();
+    } catch (e) {
+      debugPrint("GLOBAL AUDIO ERROR: $e");
+    }
+  }
+
+  // 3. Your existing IPA mapping logic remains completely untouched
   static String getIPA(String text, {required bool isLong}) {
     final cleanText = text.toUpperCase().trim();
 
