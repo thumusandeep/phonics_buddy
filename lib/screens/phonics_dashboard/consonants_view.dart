@@ -4,6 +4,7 @@ import '../../widgets/animated_phonics_circle.dart';
 import 'package:flutter/services.dart'; 
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'dart:ui';
+import 'dart:async';
 import '../../utils/phonics_utils.dart';
 
 class ConsonantsView extends StatefulWidget {
@@ -20,6 +21,8 @@ class _ConsonantsViewState extends State<ConsonantsView> {
     'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 
     'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'
   ];
+  // ⏱️ Adds a micro debounce timer to clear physical swipe gestures for Apple WebKit
+  Timer? _swipeDebounce;
 
   void _onLetterSelected(int index) {
     HapticFeedback.lightImpact();
@@ -46,6 +49,27 @@ class _ConsonantsViewState extends State<ConsonantsView> {
     
     // Clean, single line:
     PhonicsUtils.playAudio("audio/consonants/$fileName");
+  }
+
+  void _handlePageChange(int index) {
+    setState(() => _currentIndex = index);
+    
+    // Cancel any active timers so sounds don't overlap
+    _swipeDebounce?.cancel();
+    
+    // The 150ms magic buffer for iPhone swipes
+    _swipeDebounce = Timer(const Duration(milliseconds: 150), () {
+      if (mounted) {
+        _play(consonants[index]); // Assumes your list is named 'consonants'
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _swipeDebounce?.cancel(); // Prevents memory leaks
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -111,45 +135,52 @@ class _ConsonantsViewState extends State<ConsonantsView> {
               child: Stack(
                 alignment: Alignment.bottomCenter,
                 children: [
-                  PageView.builder(
-                    controller: _pageController,
-                    physics: const BouncingScrollPhysics(), 
-                    onPageChanged: (index) {
-                      setState(() => _currentIndex = index);
-                      _play(consonants[index]);
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      debugPrint("CANVAS TAP: Replaying active consonant sound");
+                      _play(consonants[_currentIndex]);
                     },
-                    itemCount: consonants.length,
-                    itemBuilder: (context, index) {
-                      String ipa = PhonicsUtils.getIPA(consonants[index], isLong: false);
-                      return Column(
-                        children: [
-                          AnimatedPhonicsCircle(
-                            text: consonants[index],
-                            color: Colors.orange,
-                            onTap: () => _play(consonants[index]),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.only(top: 12),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                            constraints: const BoxConstraints(maxWidth: 350),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.1), // Light version of the vowel color
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                    child: PageView.builder(
+                      controller: _pageController,
+                      physics: const BouncingScrollPhysics(), 
+                      onPageChanged: (index) {
+                        setState(() => _currentIndex = index);
+                        _play(consonants[index]);
+                      },
+                      itemCount: consonants.length,
+                      itemBuilder: (context, index) {
+                        String ipa = PhonicsUtils.getIPA(consonants[index], isLong: false);
+                        return Column(
+                          children: [
+                            AnimatedPhonicsCircle(
+                              text: consonants[index],
+                              color: Colors.orange,
+                              onTap: () => _play(consonants[index]),
                             ),
-                            child: Text(
-                              ipa,
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange.withOpacity(0.8), // Matches the vowel's color
-                                fontFamily: 'monospace', // Often looks better for IPA symbols
+                            Container(
+                              margin: const EdgeInsets.only(top: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              constraints: const BoxConstraints(maxWidth: 350),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.1), // Light version of the vowel color
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                              ),
+                              child: Text(
+                                ipa,
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.withOpacity(0.8), // Matches the vowel's color
+                                  fontFamily: 'monospace', // Often looks better for IPA symbols
+                                ),
                               ),
                             ),
-                          ),
-                        ],     
-                      );
-                    },
+                          ],     
+                        );
+                      },
+                    ),
                   ),
                   // THE DOTS: Positioned at the bottom of the stack
                   Padding(

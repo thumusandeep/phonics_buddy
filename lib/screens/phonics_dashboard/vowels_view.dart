@@ -1,9 +1,9 @@
-import 'package:phonics_buddy/utils/phonics_utils.dart'; // Update this path to where your file actually is
+import 'package:phonics_buddy/utils/phonics_utils.dart'; 
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../widgets/animated_phonics_circle.dart';
 import 'dart:ui';
-
+import 'dart:async'; // Required for Timer balancing
 
 enum VowelMode { short, long }
 
@@ -13,18 +13,41 @@ class VowelsView extends StatefulWidget {
 }
 
 class _VowelsViewState extends State<VowelsView> {
-  VowelMode _currentMode = VowelMode.short; // Default to Short Vowels
+  VowelMode _currentMode = VowelMode.short; 
   int _currentIndex = 0;
   final List<String> vowels = ['A', 'E', 'I', 'O', 'U'];
   final PageController _pageController = PageController();
-  // final AudioPlayer _player = AudioPlayer();
+  
+  // ⏱️ Adds a micro debounce timer to clear physical swipe gestures for Apple WebKit
+  Timer? _swipeDebounce;
 
   void _play(String letter) {
     String folder = (_currentMode == VowelMode.short) ? "short" : "long";
     String fileName = "${letter.toLowerCase()}.mp3";
     
-    // Call the global manager in one line:
     PhonicsUtils.playAudio("audio/vowels/$folder/$fileName");
+  }
+
+  // 🔊 Clean logic for both Swipes and Arrow/Chip selections
+  void _handlePageChange(int index) {
+    setState(() => _currentIndex = index);
+    
+    // Cancel any quick active transitions to protect the hardware buffer
+    _swipeDebounce?.cancel();
+    
+    // 150ms buffer tells iOS Safari: "Finger lift completed, treat audio as intentional user interaction"
+    _swipeDebounce = Timer(const Duration(milliseconds: 150), () {
+      if (mounted) {
+        _play(vowels[index]);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _swipeDebounce?.cancel(); // Memory cleanup
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -35,7 +58,7 @@ class _VowelsViewState extends State<VowelsView> {
       behavior: ScrollConfiguration.of(context).copyWith(
         dragDevices: {
           PointerDeviceKind.touch,
-          PointerDeviceKind.mouse, // This is what your Lenovo needs
+          PointerDeviceKind.mouse, 
           PointerDeviceKind.trackpad,
         },
       ),
@@ -51,12 +74,11 @@ class _VowelsViewState extends State<VowelsView> {
                 ButtonSegment(value: VowelMode.long, label: Text('Long Vowels'), icon: Icon(Icons.cake)),
               ],
               selected: {_currentMode},
-              
               onSelectionChanged: (newSelection) {
                 setState(() {
                   _currentMode = newSelection.first;
                 });
-                _play(vowels[_currentIndex]); // Re-play the sound in the new mode
+                _play(vowels[_currentIndex]); 
               },
             ),
           ),
@@ -77,7 +99,7 @@ class _VowelsViewState extends State<VowelsView> {
                     showCheckmark: false,
                     onSelected: (selected) {
                       if (selected) {
-                        _pageController.animateToPage(index, duration: const Duration(milliseconds: 300), curve: Curves.ease);
+                        _onLetterSelected(index);
                       }
                     },
                   ),
@@ -90,47 +112,54 @@ class _VowelsViewState extends State<VowelsView> {
           Expanded(
             child: Stack(
               children: [
-                PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() => _currentIndex = index);
-                    _play(vowels[index]);
+                // Tap tracking layer covering the entire screen canvas area
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    debugPrint("CANVAS TAP: Replaying active vowel sound");
+                    _play(vowels[_currentIndex]);
                   },
-                  itemCount: vowels.length,
-                  itemBuilder: (context, index) {
-                    String ipa = PhonicsUtils.getIPA(vowels[index], isLong: _currentMode == VowelMode.long);
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: _handlePageChange, // Routed to our custom interaction filter
+                    itemCount: vowels.length,
+                    itemBuilder: (context, index) {
+                      String ipa = PhonicsUtils.getIPA(vowels[index], isLong: _currentMode == VowelMode.long);
 
-                    return Column(
-                      children: [
-                        AnimatedPhonicsCircle(
-                          text: vowels[index],
-                          color: themeColor,
-                          onTap: () => _play(vowels[index]),
-                        ),
-                        // Text(ipa, style: TextStyle(fontSize: 24, fontStyle: FontStyle.italic)),
-                        Container(
-                          margin: const EdgeInsets.only(top: 12),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: themeColor.withOpacity(0.1), // Light version of the vowel color
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: themeColor.withOpacity(0.3)),
+                      return Column(
+                        children: [
+                          AnimatedPhonicsCircle(
+                            text: vowels[index],
+                            color: themeColor,
+                            onTap: () => _play(vowels[index]),
                           ),
-                          child: Text(
-                            ipa,
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: themeColor.withOpacity(0.8), // Matches the vowel's color
-                              fontFamily: 'monospace', // Often looks better for IPA symbols
+                          Container(
+                            margin: const EdgeInsets.only(top: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: themeColor.withOpacity(0.1), 
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: themeColor.withOpacity(0.3)),
+                            ),
+                            child: Text(
+                              ipa,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: themeColor.withOpacity(0.8), 
+                                fontFamily: 'monospace', 
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
                 
+                // Add the explicit Nav Arrows over the Stack layout
+                _navArrow(Icons.arrow_back_ios, isLeft: true, color: themeColor),
+                _navArrow(Icons.arrow_forward_ios, isLeft: false, color: themeColor),
               ],
             ),
           ),
@@ -139,12 +168,10 @@ class _VowelsViewState extends State<VowelsView> {
     );
   }
 
-  // ... (Same _navArrow helper as before, just pass 'color' to it)
   Widget _navArrow(IconData icon, {required bool isLeft, required Color color}) {
     return Positioned(
       left: isLeft ? 40 : null,
       right: isLeft ? null : 40,
-      // Positioning it slightly higher for better ergonomics
       top: MediaQuery.of(context).size.height / 3.5, 
       child: IconButton(
         icon: Icon(icon, size: 50, color: color.withOpacity(0.5)),
@@ -168,5 +195,4 @@ class _VowelsViewState extends State<VowelsView> {
     );
     _play(vowels[index]);
   }
-  
 }
